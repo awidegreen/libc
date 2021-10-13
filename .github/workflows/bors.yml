@@ -226,6 +226,31 @@ jobs:
       - name: Execute build.sh
         run: LIBC_CI=1 TOOLCHAIN=${{ matrix.toolchain }} sh ./ci/build.sh
 
+  build_channels_windows:
+    name: Build Channels Windows
+    needs: windows
+    runs-on: windows-2019
+    env:
+      OS: windows
+    strategy:
+      fail-fast: true
+      matrix:
+        toolchain: [
+          1.13.0,
+          stable,
+        ]
+    steps:
+      - uses: rust-lang/simpleinfra/github-actions/cancel-outdated-builds@master
+        with:
+          github_token: "${{ secrets.GITHUB_TOKEN }}"
+      - uses: actions/checkout@v2
+      - name: Self-update rustup
+        run: rustup self update
+        shell: bash
+      - name: Execute build.sh
+        run: LIBC_CI=1 TOOLCHAIN=${{ matrix.toolchain }} WIN_TARGET=${{ matrix.target }} sh ./ci/build.sh
+        shell: bash
+
   semver_linux:
     name: Semver Linux
     runs-on: ubuntu-20.04
@@ -283,6 +308,7 @@ jobs:
       docker_switch,
       build_channels_linux,
       build_channels_macos,
+      build_channels_windows,
       docs,
     ]
 
@@ -303,6 +329,7 @@ jobs:
       docker_switch,
       build_channels_linux,
       build_channels_macos,
+      build_channels_windows,
       docs,
     ]
 
